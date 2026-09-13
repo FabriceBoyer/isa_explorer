@@ -80,3 +80,28 @@ test("English, theme, documentation and mobile layout", async ({ page }) => {
     page.getByRole("heading", { name: "Primary sources" }),
   ).toBeVisible();
 });
+
+test("dark surfaces and text follow manual and system theme across pages", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Thème dark" }).click();
+  await expect(page.locator("html")).toHaveCSS("background-color", "rgb(16, 22, 36)");
+  await expect(page.locator("html")).toHaveCSS("color", "rgb(224, 229, 242)");
+  for (const selector of [".nav-count", ".filters .selected", ".banner-icon"]) {
+    await expect(page.locator(selector)).toHaveCSS("background-color", "rgb(40, 35, 63)");
+  }
+  await expect(page.locator(".architecture-card").first()).toHaveCSS("background-color", "rgb(24, 32, 49)");
+  for (const route of ["architecture/amd64", "architecture/amd64/ADD", "lab", "instructions", "help"]) {
+    await page.goto("/#/" + route);
+    await expect(page.locator("html")).toHaveCSS("background-color", "rgb(16, 22, 36)");
+    await expect(page.locator("main h1")).toHaveCSS("color", "rgb(224, 229, 242)");
+    await expect(page.locator("header")).toHaveCSS("background-color", "rgb(24, 32, 49)");
+  }
+  await page.getByRole("button", { name: "Thème auto" }).click();
+  await expect(page.locator("html")).toHaveCSS("background-color", "rgb(246, 247, 251)");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveCSS("background-color", "rgb(16, 22, 36)");
+  await page.getByRole("button", { name: "Thème light" }).click();
+  await expect(page.locator("html")).toHaveCSS("background-color", "rgb(246, 247, 251)");
+  await expect(page.locator("html")).toHaveCSS("color", "rgb(37, 48, 74)");
+});
