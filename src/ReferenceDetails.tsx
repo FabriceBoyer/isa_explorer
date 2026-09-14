@@ -13,6 +13,7 @@ const icons: Record<InstructionClass, typeof Cpu> = {
 export function ReferenceDetails({ arch, entry, lang }: { arch: string; entry: ReferenceEntry; lang: Lang }) {
   const t = (fr: string, en: string) => lang === "fr" ? fr : en;
   const [family, setFamily] = useState("all");
+  const [lessonStage, setLessonStage] = useState(0);
   const forms = entry.forms.filter((form) => family === "all" || form.family === family);
   const catalog = catalogs[arch];
   const guide = instructionGuide(entry);
@@ -20,6 +21,30 @@ export function ReferenceDetails({ arch, entry, lang }: { arch: string; entry: R
   const syntaxCount = entry.forms.filter((form) => form.syntax).length;
   const flagCount = entry.forms.filter((form) => form.flags).length;
   const featureCount = new Set(entry.forms.flatMap((form) => form.features ?? [])).size;
+  const firstOperands = extractOperands(entry.forms[0] ?? { family: "", source: "", format: "" });
+  const lesson = [
+    {
+      title: t("1. Le besoin", "1. The need"),
+      text: guide.example[lang],
+    },
+    {
+      title: t("2. Les entrées", "2. The inputs"),
+      text: firstOperands.length
+        ? t(
+            `La première forme fait intervenir ${firstOperands.length} opérande${firstOperands.length > 1 ? "s" : ""} : ${firstOperands.map((operand) => operand.token).join(", ")}. Le tableau détaillé indique leur nature et, quand la source le précise, leur accès en lecture ou écriture.`,
+            `The first form uses ${firstOperands.length} operand${firstOperands.length > 1 ? "s" : ""}: ${firstOperands.map((operand) => operand.token).join(", ")}. The detailed table shows their nature and, when available from the source, read or write access.`,
+          )
+        : t("Cette forme n’expose aucun opérande dans l’index. Son effet porte sur un état implicite du processeur ou doit être vérifié dans la définition liée.", "This form exposes no operand in the index. Its effect acts on implicit processor state or must be checked in the linked definition."),
+    },
+    {
+      title: t("3. L’exécution", "3. Execution"),
+      text: `${localize(guide.operation, lang)}. ${localize(guide.summary, lang)}`,
+    },
+    {
+      title: t("4. Le résultat", "4. The result"),
+      text: `${localize(guide.destination, lang)}. ${guide.purpose[lang]}`,
+    },
+  ];
 
   return <section className="reference-details">
     <div className="panel reference-intro">
@@ -33,6 +58,14 @@ export function ReferenceDetails({ arch, entry, lang }: { arch: string; entry: R
         <div className="concrete-use"><span>{t("EXEMPLE CONCRET", "CONCRETE EXAMPLE")}</span><p>{guide.example[lang]}</p></div>
       </div>
       {!guide.specific && <p className="source-scope"><CircleAlert size={16} />{t("Cette instruction est très spécialisée : l’explication est déduite de sa famille. Consultez la définition normative pour connaître son algorithme exact.", "This instruction is highly specialized: the explanation is inferred from its family. Consult the normative definition for its exact algorithm.")}</p>}
+      <div className="guided-lesson">
+        <div className="guided-lesson-heading"><div><span className="eyebrow purple">{t("PARCOURS GUIDÉ", "GUIDED WALKTHROUGH")}</span><h3>{t(`Comprendre ${entry.name} pas à pas`, `Understand ${entry.name} step by step`)}</h3></div><span>{lessonStage + 1} / {lesson.length}</span></div>
+        <div className="lesson-tabs" role="tablist" aria-label={t("Étapes de la fiche guidée", "Guided reference steps")}>
+          {lesson.map((step, index) => <button role="tab" aria-selected={lessonStage === index} className={lessonStage === index ? "active" : ""} onClick={() => setLessonStage(index)} key={step.title}><b>{index + 1}</b><span>{step.title.replace(/^\d+\. /, "")}</span></button>)}
+        </div>
+        <div className="lesson-content" role="tabpanel"><h4>{lesson[lessonStage].title}</h4><p>{lesson[lessonStage].text}</p></div>
+        <button className="text-link lesson-next" onClick={() => setLessonStage((lessonStage + 1) % lesson.length)}>{lessonStage === lesson.length - 1 ? t("Recommencer", "Start again") : t("Étape suivante", "Next step")}<ArrowRight size={15} /></button>
+      </div>
       <div className="reference-stats" aria-label={t("Couverture de la fiche", "Reference coverage")}>
         <span><strong>{entry.forms.length}</strong>{t("formes", "forms")}</span>
         <span><strong>{entry.families.length}</strong>{t("familles", "families")}</span>

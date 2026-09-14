@@ -146,6 +146,9 @@ test("documents imported instructions with operands, flags and data flow", async
   await expect(page.getByText("Arithmétique", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "À quoi sert ADCX ?" })).toBeVisible();
   await expect(page.locator(".concrete-use")).toContainText("128 bits");
+  await expect(page.getByRole("tab", { name: /Le besoin/ })).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("tab", { name: /L’exécution/ }).click();
+  await expect(page.getByRole("tabpanel")).toContainText("opération arithmétique");
   await expect(page.getByLabel("Chemin conceptuel des données")).toBeVisible();
   await expect(page.locator(".operand-table tbody tr").first()).toContainText("REG0");
   await expect(page.locator(".flag-list").first()).toContainText("CF");

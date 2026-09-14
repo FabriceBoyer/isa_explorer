@@ -35,6 +35,7 @@ export function attachCatalog(architectures: Architecture[]) {
       const item: Instruction = {
         name: entry.name,
         kind: 'reference',
+        guided: true,
         title: { fr: entry.families.join(' · '), en: entry.families.join(' · ') },
         syntax: entry.forms.find(f => f.syntax)?.syntax || entry.name,
         effect: '', description: {fr:'',en:''}, flags: {fr:'',en:''},

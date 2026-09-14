@@ -43,8 +43,10 @@ it('never turns metadata into executable instructions',()=>{
  expect(simulatedMnemonics.riscv).toHaveLength(10);
  expect(simulatedMnemonics.avr).toBeUndefined();
 });
-it('preserves the guided references and their examples',()=>{
+it('provides a guided page for every instruction and preserves authored examples',()=>{
  const guided=architectures.flatMap(a=>a.instructions.filter(i=>i.guided));
- expect(guided).toHaveLength(29);
- expect(guided.every(i=>i.example && i.description.fr && i.description.en)).toBe(true);
+ expect(guided).toHaveLength(architectures.flatMap(a=>a.instructions).length);
+ const authored=guided.filter(i=>i.kind!=="reference");
+ expect(authored).toHaveLength(29);
+ expect(authored.every(i=>i.example && i.description.fr && i.description.en)).toBe(true);
 });

@@ -1788,6 +1788,19 @@ pre {
 .purpose-grid p { margin:0; }
 .concrete-use { border-color:color-mix(in srgb,var(--purple) 35%,var(--border)) !important; background:var(--purple-soft) !important; }
 .concrete-use>span { display:block; margin-bottom:7px; color:var(--purple); font-size:10px; font-weight:800; letter-spacing:.1em; }
+.guided-lesson { margin:22px 0; padding:18px; border:1px solid color-mix(in srgb,var(--purple) 32%,var(--border)); border-radius:16px; background:linear-gradient(135deg,var(--purple-soft),var(--surface)); }
+.guided-lesson-heading { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+.guided-lesson-heading h3 { margin:5px 0 14px; }
+.guided-lesson-heading>span { color:var(--muted); font:600 12px/1 "Space Grotesk",sans-serif; }
+.lesson-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.lesson-tabs button { display:flex; align-items:center; gap:8px; min-width:0; padding:9px; border:1px solid var(--border); border-radius:11px; background:var(--surface); color:var(--muted); text-align:left; }
+.lesson-tabs button b { display:grid; place-items:center; width:23px; height:23px; flex:0 0 auto; border-radius:50%; background:var(--bg); color:var(--purple); }
+.lesson-tabs button.active { border-color:var(--purple); color:var(--text); box-shadow:0 0 0 2px color-mix(in srgb,var(--purple) 12%,transparent); }
+.lesson-content { min-height:112px; margin-top:10px; padding:16px; border-radius:12px; background:var(--surface); animation:fade-up .25s ease; }
+.lesson-content h4 { margin:0 0 7px; color:var(--purple); }
+.lesson-content p { margin:0; }
+.lesson-next { margin-top:10px; }
+.guided-complete { border-color:color-mix(in srgb,var(--green) 45%,var(--border)) !important; color:var(--green) !important; }
 .purpose-icon { width:44px; height:44px; flex:0 0 44px; border-radius:14px; display:grid; place-items:center; color:var(--purple); background:var(--purple-soft); }
 .reference-stats { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0; }
 .reference-stats span { display:flex; align-items:baseline; gap:6px; padding:8px 12px; border:1px solid var(--border); border-radius:12px; color:var(--muted); font-size:12px; background:var(--bg); }
@@ -1813,6 +1826,8 @@ pre {
 .notation-guide h3 { display:flex; align-items:center; gap:8px; }
 @media (max-width:700px) {
   .purpose-grid { grid-template-columns:1fr; }
+  .lesson-tabs { grid-template-columns:1fr 1fr; }
+  .lesson-tabs button span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .instruction-flow { grid-template-columns:1fr; }
   .instruction-flow svg { transform:rotate(90deg); margin:auto; }
   .reference-stats span { flex:1 1 42%; }

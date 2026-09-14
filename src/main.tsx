@@ -575,8 +575,8 @@ function ArchitecturePage({ a, lang }: { a: Architecture; lang: Lang }) {
       <h2>{t("Les instructions, expliquées", "Instructions, explained")}</h2>
       <p className="subtle">
         {t(
-          "Catalogue des instructions et extensions de la version indiquée. Les fiches guidées et les formes de référence sont distinguées.",
-          "Instruction and extension catalogue for the named version. Guided references and source forms are distinguished.",
+          "Catalogue des instructions et extensions de la version indiquée. Chaque instruction dispose d’une fiche guidée progressive.",
+          "Instruction and extension catalogue for the named version. Every instruction has a progressive guided reference.",
         )}
       </p>
       <InstructionTable key={a.id} a={a} lang={lang} />
@@ -627,10 +627,9 @@ function InstructionTable({ a, lang }: { a: Architecture; lang: Lang }) {
   const t = (fr: string, en: string) => lang === "fr" ? fr : en;
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState("all");
-  const [guided, setGuided] = useState(false);
   const [page, setPage] = useState(0);
   const families = [...new Set(a.instructions.flatMap(i => i.reference?.families || []))].sort();
-  const filtered = a.instructions.filter(i => (!guided || i.guided) &&
+  const filtered = a.instructions.filter(i =>
     (family === "all" || i.reference?.families.includes(family)) &&
     `${i.name} ${i.title[lang]} ${i.reference?.families.join(' ') || ''}`.toLowerCase().includes(query.toLowerCase()));
   const pages = Math.max(1, Math.ceil(filtered.length / 30));
@@ -640,12 +639,12 @@ function InstructionTable({ a, lang }: { a: Architecture; lang: Lang }) {
     <div className="instruction-filters">
       <label className="search"><Search size={16}/><input aria-label={t("Rechercher une instruction ","Search instructions ")+a.name} value={query} onChange={e => {setQuery(e.target.value);setPage(0);}} placeholder={t("Mnémonique, extension…","Mnemonic, extension…")}/></label>
       <select aria-label={t("Extension ","Extension ")+a.name} value={family} onChange={e=>{setFamily(e.target.value);setPage(0);}}><option value="all">{t("Toutes les familles / extensions","All families / extensions")}</option>{families.map(f=><option key={f}>{f}</option>)}</select>
-      <label className="guided-filter"><input type="checkbox" checked={guided} onChange={e=>{setGuided(e.target.checked);setPage(0);}}/>{t("Fiches guidées","Guided references")}</label>
+      <span className="guided-filter guided-complete">✓ {t("Toutes les fiches sont guidées", "Every reference is guided")}</span>
     </div>
     <div className="instruction-table">
       {filtered.slice(current * 30, (current + 1) * 30).map(i=><a key={i.name} href={`#/architecture/${a.id}/${encodeURIComponent(i.name)}`}>
         <code>{i.name}</code><span>{i.title[lang]}<small>{i.syntax}</small></span>
-        <span className="pill neutral">{i.guided?t("Guidée","Guided"):t("Référence","Reference")}</span><ArrowUpRight size={17}/>
+        <span className="pill neutral">{t("Guidée", "Guided")}</span><ArrowUpRight size={17}/>
       </a>)}
       {!filtered.length && <div className="empty">{t("Aucune instruction ne correspond à ces filtres.","No instruction matches these filters.")}</div>}
     </div>
@@ -665,8 +664,8 @@ function InstructionIndex({ lang }: { lang: Lang }) {
       </h1>
       <p className="lead">
         {lang === "fr"
-          ? "Recherchez parmi les catalogues versionnés : jeux de base, extensions et fiches guidées."
-          : "Search versioned catalogues: base instruction sets, extensions and guided references."}
+          ? "Recherchez parmi les catalogues versionnés : chaque instruction possède une fiche guidée."
+          : "Search versioned catalogues: every instruction has a guided reference."}
       </p>
       <label className="search wide">
         <Search size={18} />
@@ -715,9 +714,9 @@ function InstructionPage({
   const [done, setDone] = useState(false);
   if (!item)
     return <h1>{t("Instruction introuvable", "Instruction not found")}</h1>;
-  if (!item.guided && item.reference) return <>
+  if (item.kind === "reference" && item.reference) return <>
     <a className="back" href={"#/architecture/" + a.id}>← {a.name}</a>
-    <div className="eyebrow purple">{a.name} · {t("Catalogue des instructions", "Instruction catalogue")}</div>
+    <div className="eyebrow purple">{a.name} · {t("Fiche guidée", "Guided reference")}</div>
     <h1><code>{item.name}</code></h1>
     <ReferenceDetails key={a.id+item.name} arch={a.id} entry={item.reference} lang={lang}/>
   </>;
@@ -1240,8 +1239,8 @@ function Help({ lang }: { lang: Lang }) {
         <h2>{t("Sources primaires", "Primary sources")}</h2>
         <p>
           {t(
-            "Fiches guidées originales et index techniques issus des sources officielles. Sources consultées le 14 septembre 2026 ; les versions et périmètres sont indiqués dans les catalogues.",
-            "Original guided references and technical indexes from official sources. Sources consulted on September 14, 2026; versions and scopes are shown in the catalogues.",
+            "Fiches guidées généralisées à tout le catalogue, avec 29 contenus originaux rédigés à la main et des index techniques issus des sources officielles. Sources consultées le 14 septembre 2026 ; les versions et périmètres sont indiqués dans les catalogues.",
+            "Guided references cover the entire catalogue, with 29 original hand-authored lessons and technical indexes from official sources. Sources consulted on September 14, 2026; versions and scopes are shown in the catalogues.",
           )}
         </p>
         <div className="sources">

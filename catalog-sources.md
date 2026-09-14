@@ -1,6 +1,6 @@
 # Sources du catalogue / Catalogue sources
 
-Le catalogue contient 8 087 mnémoniques par profil (un même nom peut apparaître dans plusieurs ISA), issus des versions ci-dessous. Les 29 fiches pédagogiques sont conservées séparément ; le moteur reste limité au sous-ensemble documenté dans le README. Les index ne garantissent pas toutes les formes binaires, toutes les extensions historiques ou futures, ni leur disponibilité sur un processeur donné.
+Le catalogue contient 8 087 mnémoniques par profil (un même nom peut apparaître dans plusieurs ISA), issus des versions ci-dessous. Chaque entrée reçoit une fiche guidée bilingue ; 29 fiches conservent en plus un contenu original rédigé à la main. Le moteur reste limité au sous-ensemble documenté dans le README. Les index ne garantissent pas toutes les formes binaires, toutes les extensions historiques ou futures, ni leur disponibilité sur un processeur donné.
 
 | Profil | Entrées importées | Source et périmètre |
 | --- | ---: | --- |
