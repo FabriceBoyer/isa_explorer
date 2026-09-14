@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowRight, ArrowUpRight, BookOpen, CircleAlert, Cpu, Database, GitBranch } from "lucide-react";
 import { catalogs, type ReferenceEntry, type ReferenceForm } from "./catalog";
 import type { Lang } from "./data";
-import { extractOperands, flagDetails, instructionGuide, localize, type InstructionClass } from "./instructionDocs";
+import { concreteSyntax, extractOperands, flagDetails, instructionGuide, localize, type InstructionClass } from "./instructionDocs";
 
 const icons: Record<InstructionClass, typeof Cpu> = {
   control: GitBranch, memory: Database, atomic: Database, conversion: ArrowRight,
@@ -28,6 +28,11 @@ export function ReferenceDetails({ arch, entry, lang }: { arch: string; entry: R
         <span className={`purpose-icon ${guide.kind}`}><Icon size={22} /></span>
         <div><span className="eyebrow purple">{localize(guide.label, lang)}</span><p>{localize(guide.summary, lang)}</p></div>
       </div>
+      <div className="purpose-grid">
+        <div><h3>{t(`À quoi sert ${entry.name} ?`, `What is ${entry.name} for?`)}</h3><p>{guide.purpose[lang]}</p></div>
+        <div className="concrete-use"><span>{t("EXEMPLE CONCRET", "CONCRETE EXAMPLE")}</span><p>{guide.example[lang]}</p></div>
+      </div>
+      {!guide.specific && <p className="source-scope"><CircleAlert size={16} />{t("Cette instruction est très spécialisée : l’explication est déduite de sa famille. Consultez la définition normative pour connaître son algorithme exact.", "This instruction is highly specialized: the explanation is inferred from its family. Consult the normative definition for its exact algorithm.")}</p>}
       <div className="reference-stats" aria-label={t("Couverture de la fiche", "Reference coverage")}>
         <span><strong>{entry.forms.length}</strong>{t("formes", "forms")}</span>
         <span><strong>{entry.families.length}</strong>{t("familles", "families")}</span>
@@ -62,10 +67,12 @@ function ReferenceFormCard({ form, name, lang }: { form: ReferenceForm; name: st
   const operands = extractOperands(form);
   const flags = form.flags ? flagDetails(form.flags) : [];
   const hasAccess = operands.some((operand) => operand.access !== "—");
+  const example = concreteSyntax(form);
   return <article className="panel reference-form">
     <div className="panel-heading"><div><span className="form-label">{t("Forme", "Form")} · {form.format.toUpperCase()}</span><h3>{form.syntax || name}</h3></div><span className="pill">{form.family}</span></div>
     <p className="form-context">{t(`Cette variante de ${name} appartient à la famille ${form.family}.`, `This ${name} variant belongs to the ${form.family} family.`)}{form.alias && <> {t("Le manuel la définit comme alias de", "The manual defines it as an alias of")} <code>{form.alias}</code>.</>}</p>
     {form.syntax && <><h4>{t("Gabarit assembleur", "Assembly template")}</h4><pre>{form.syntax}</pre><p className="field-hint">{t("Remplacez les paramètres génériques par des registres, constantes ou conditions valides pour cette forme.", "Replace generic parameters with registers, constants, or conditions valid for this form.")}</p></>}
+    {example && <div className="syntax-example"><h4>{t("Exemple de syntaxe instanciée", "Instantiated syntax example")}</h4><pre>{example}</pre><p>{t("Exemple pédagogique : les registres et constantes peuvent devoir être adaptés à la variante matérielle.", "Teaching example: registers and constants may need adapting to the hardware variant.")}</p></div>}
     {operands.length > 0 ? <>
       <h4>{t("Interaction avec les opérandes", "Operand interaction")}</h4>
       <div className="operand-table-wrap"><table className="operand-table"><thead><tr><th>{t("Opérande", "Operand")}</th><th>{t("Accès", "Access")}</th><th>{t("Interprétation", "Interpretation")}</th></tr></thead><tbody>{operands.map((operand, index) => <tr key={`${operand.token}-${index}`}><td><code>{operand.token}</code></td><td>{operand.access}</td><td>{operand.meaning[lang]}</td></tr>)}</tbody></table></div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { catalogs, type ReferenceEntry, type ReferenceForm } from "./catalog";
-import { classifyInstruction, extractOperands, flagDetails, instructionGuide } from "./instructionDocs";
+import { classifyInstruction, concreteSyntax, extractOperands, flagDetails, instructionGuide } from "./instructionDocs";
 
 const entry = (name: string, family = "BASE"): ReferenceEntry => ({
   name,
@@ -62,14 +62,25 @@ describe("instruction documentation", () => {
   });
 
   it("provides a bilingual guide for every catalogue entry", () => {
+    let specific = 0;
+    let total = 0;
     for (const catalog of Object.values(catalogs)) {
       for (const instruction of catalog.entries) {
         const guide = instructionGuide(instruction);
+        total++;
+        if (guide.specific) specific++;
         expect(guide.label.fr).not.toBe("");
         expect(guide.label.en).not.toBe("");
         expect(guide.summary.fr).not.toBe("");
         expect(guide.operation.en).not.toBe("");
       }
     }
+    expect(specific / total).toBeGreaterThan(0.75);
+  });
+
+  it("instantiates concrete syntax only when every placeholder is resolved", () => {
+    expect(concreteSyntax({ family: "AVR", source: "https://example.com", format: "assembly", syntax: "ADC Rd,Rr" })).toBe("ADC R16,R17");
+    expect(concreteSyntax({ family: "SVE", source: "https://example.com", format: "assembly", syntax: "PTRUE <Pd>.<T>{, <pattern>}" })).toBe("PTRUE P0.S, ALL");
+    expect(concreteSyntax({ family: "SME", source: "https://example.com", format: "assembly", syntax: "SPECIAL <unknown>" })).toBeUndefined();
   });
 });
