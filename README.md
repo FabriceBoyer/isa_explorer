@@ -38,7 +38,7 @@ npm run test:e2e     # Navigation, édition, exécution, langue, thème, mobile
 
 L’ISA est le contrat logiciel, la microarchitecture est sa réalisation matérielle. AMD64 et Intel 64 appartiennent à la même famille ; « x86 » désigne ici précisément IA-32 pour permettre la comparaison avec le mode 64 bits.
 
-Le catalogue comporte **29 fiches pédagogiques**, enrichies par un catalogue versionné de plusieurs milliers de mnémoniques avec filtres par famille, recherche et pagination. Les nouvelles pages de référence exposent les métadonnées et liens officiels ; elles ne constituent pas toutes des tutoriels animés ou des instructions exécutables. Le détail des sources, versions, limites et commandes de régénération figure dans [catalog-sources.md](catalog-sources.md). Chaque fiche pédagogique décrit la forme affichée, sa syntaxe, ses effets, ses indicateurs, un exemple, des limites et une source primaire. Les instructions arithmétiques sélectionnées ont un mini-modèle interactif. Les schémas fetch/decode/execute/write sont conceptuels, pas des modèles de performance.
+Le catalogue comporte **29 fiches pédagogiques**, enrichies par un catalogue versionné de plusieurs milliers de mnémoniques avec filtres par famille, recherche et pagination. Chaque page importée fournit un repère fonctionnel bilingue, un chemin conceptuel des données, les variantes, un tableau d’opérandes, les accès lecture/écriture disponibles, les indicateurs décodés, les capacités requises et un lien vers la définition normative. Une absence de métadonnée est signalée explicitement au lieu d’être interprétée comme une absence d’effet. Ces références ne constituent pas toutes des tutoriels animés ou des instructions exécutables. Le détail des sources, versions, limites et commandes de régénération figure dans [catalog-sources.md](catalog-sources.md). Chaque fiche pédagogique décrit la forme affichée, sa syntaxe, ses effets, ses indicateurs, un exemple, des limites et une source primaire. Les instructions arithmétiques sélectionnées ont un mini-modèle interactif. Les schémas de circulation sont conceptuels, pas des modèles de performance.
 
 ## Utiliser le laboratoire
 
@@ -106,6 +106,7 @@ Pour demander une validation obligatoire avant fusion, activer la protection de 
 
 ```text
 src/data.ts          Profils, fiches et textes FR/EN, références officielles
+src/instructionDocs.ts Classification, opérandes et indicateurs des références
 src/engine.ts        Parseur et machine entière, fonctions pures
 src/engine.test.ts   Algorithmes, débordements, erreurs, immutabilité, limites
 src/main.tsx         Navigation, catalogue, fiches, laboratoire et aide

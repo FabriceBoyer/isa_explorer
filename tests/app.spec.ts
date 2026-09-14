@@ -140,3 +140,19 @@ test('complete AVR catalogue, extension filters and encoded instruction routes',
  await page.goto('/#/lab');
  await expect(page.locator('.supported a')).toHaveCount(11);
 });
+
+test("documents imported instructions with operands, flags and data flow", async ({ page }) => {
+  await page.goto("/#/architecture/amd64/ADCX");
+  await expect(page.getByText("Arithmétique", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Chemin conceptuel des données")).toBeVisible();
+  await expect(page.locator(".operand-table tbody tr").first()).toContainText("REG0");
+  await expect(page.locator(".flag-list").first()).toContainText("CF");
+
+  await page.goto("/#/architecture/arm64/PTRUE");
+  await expect(page.getByText("SIMD ou vectoriel", { exact: true })).toBeVisible();
+  await expect(page.locator(".operand-table tbody tr")).not.toHaveCount(0);
+
+  await page.goto("/#/architecture/avr/SLEEP");
+  await expect(page.getByText("Système et privilèges", { exact: true })).toBeVisible();
+  await expect(page.locator(".metadata-missing", { hasText: "opérandes" })).toBeVisible();
+});
