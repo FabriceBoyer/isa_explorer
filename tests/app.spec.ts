@@ -74,8 +74,8 @@ test("runs the advanced playground demonstrations", async ({ page }) => {
 });
 test("English, theme, documentation and mobile layout", async ({ page }) => {
   await page.goto("/#/architecture/amd64/ADD");
-  await page.getByRole("button", { name: "Exécuter l’opération" }).click();
-  await expect(page.locator(".destination strong")).toHaveText("12");
+  await page.getByRole("button", { name: "Tester l’instruction" }).click();
+  await expect(page.locator(".tester-result strong")).toHaveText("17");
   await page.getByRole("button", { name: "Changer de langue" }).click();
   await expect(
     page.getByRole("heading", { name: "Syntax & operation" }),
@@ -161,4 +161,7 @@ test("documents imported instructions with operands, flags and data flow", async
   await page.goto("/#/architecture/avr/SLEEP");
   await expect(page.getByText("Système et privilèges", { exact: true })).toBeVisible();
   await expect(page.locator(".metadata-missing", { hasText: "opérandes" })).toBeVisible();
+  await page.getByRole("button", { name: "Tester l’instruction" }).click();
+  await expect(page.locator(".tester-result strong")).toHaveText("12");
+  await expect(page.locator(".model-badge")).toContainText("Modèle pédagogique");
 });

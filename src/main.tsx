@@ -46,6 +46,7 @@ import {
 } from "./engine";
 import { catalogs, simulatedMnemonics } from "./catalog";
 import { ReferenceDetails } from "./ReferenceDetails";
+import { MiniTester } from "./MiniTester";
 import "./style.css";
 function stored(key: string, fallback: string) {
   try {
@@ -709,25 +710,19 @@ function InstructionPage({
   lang: Lang;
 }) {
   const t = (fr: string, en: string) => (lang === "fr" ? fr : en);
-  const [left, setLeft] = useState(7);
-  const [right, setRight] = useState(5);
-  const [done, setDone] = useState(false);
   if (!item)
     return <h1>{t("Instruction introuvable", "Instruction not found")}</h1>;
   if (item.kind === "reference" && item.reference) return <>
     <a className="back" href={"#/architecture/" + a.id}>← {a.name}</a>
     <div className="eyebrow purple">{a.name} · {t("Fiche guidée", "Guided reference")}</div>
     <h1><code>{item.name}</code></h1>
-    <ReferenceDetails key={a.id+item.name} arch={a.id} entry={item.reference} lang={lang}/>
+    <ReferenceDetails key={a.id+item.name} arch={a.id} bits={a.bits} entry={item.reference} lang={lang}/>
   </>;
-  const arithmetic = ["ADD", "SUB", "XOR", "EOR"].includes(item.name);
-  const raw =
-    item.name === "SUB"
-      ? left - right
-      : ["XOR", "EOR"].includes(item.name)
-        ? left ^ right
-        : left + right;
-  const result = BigInt.asUintN(a.bits, BigInt(raw)).toString();
+  const testEntry = item.reference ?? {
+    name: item.name,
+    families: [a.family],
+    forms: [{ family: a.family, source: a.source, format: "assembly", syntax: item.syntax }],
+  };
   return (
     <>
       <a className="back" href={"#/architecture/" + a.id}>
@@ -780,61 +775,8 @@ function InstructionPage({
           </a>
         </section>
       </div>
-      {item.reference && <details className="reference-expander"><summary>{t("Toutes les formes et extensions référencées", "All referenced forms and extensions")}</summary><ReferenceDetails key={a.id+item.name} arch={a.id} entry={item.reference} lang={lang}/></details>}
-      {arithmetic && (
-        <section className="panel">
-          <h2>{t("Faites circuler les données", "Make the data flow")}</h2>
-          <p>
-            {t(
-              "Modèle de l’opération sur deux petites valeurs ; l’encodage et les indicateurs ne sont pas simulés ici.",
-              "Operation model using two small values; encoding and flags are not simulated here.",
-            )}
-          </p>
-          <div className={"operation " + (done ? "executed" : "")}>
-            <label>
-              {t("Source A", "Source A")}
-              <input
-                type="number"
-                min="0"
-                max="255"
-                value={left}
-                onChange={(e) => {
-                  setLeft(Math.max(0, Math.min(255, Number(e.target.value))));
-                  setDone(false);
-                }}
-              />
-            </label>
-            <span>{t("et", "and")}</span>
-            <label>
-              {t("Source B", "Source B")}
-              <input
-                type="number"
-                min="0"
-                max="255"
-                value={right}
-                onChange={(e) => {
-                  setRight(Math.max(0, Math.min(255, Number(e.target.value))));
-                  setDone(false);
-                }}
-              />
-            </label>
-            <ArrowRight />
-            <div className="alu">
-              {item.name}
-              <small>ALU</small>
-            </div>
-            <ArrowRight />
-            <div className="destination">
-              <small>{t("Destination", "Destination")}</small>
-              <strong>{done ? result : "—"}</strong>
-            </div>
-          </div>
-          <button className="button primary" onClick={() => setDone(true)}>
-            <Play size={16} />
-            {t("Exécuter l’opération", "Execute operation")}
-          </button>
-        </section>
-      )}
+      <MiniTester key={`${a.id}-${item.name}`} entry={testEntry} bits={a.bits} lang={lang} />
+      {item.reference && <details className="reference-expander"><summary>{t("Toutes les formes et extensions référencées", "All referenced forms and extensions")}</summary><ReferenceDetails key={a.id+item.name} arch={a.id} bits={a.bits} entry={item.reference} lang={lang} showTester={false}/></details>}
     </>
   );
 }
@@ -1197,8 +1139,8 @@ function Help({ lang }: { lang: Lang }) {
     [
       t("Couverture et limites", "Coverage and limitations"),
       t(
-        "Les sept profils donnent accès à des catalogues versionnés : Intel XED, Arm A64 2025-09 ASL1, RISC-V ratifié, SPARC V8, Power ISA 3.1C et AVR DS40002198B. Chaque référence importée explique la fonction du mnémonique, donne un cas d’usage concret et instancie la syntaxe quand le gabarit le permet. Elle présente aussi le chemin des données, les opérandes, indicateurs, variantes et capacités requises, et signale les métadonnées absentes. Le simulateur exécute trois sous-ensembles entiers 64 bits : AMD64, A64 et RV64I. Il ne simule ni mémoire, exceptions, privilèges, flottants, SIMD, pipelines réels ni instructions binaires. Les autres architectures disposent de fiches mais pas de moteur. Les liens officiels font autorité pour la sémantique exacte, les formes, extensions et exceptions.",
-        "The seven profiles provide versioned catalogues: Intel XED, Arm A64 2025-09 ASL1, ratified RISC-V, SPARC V8, Power ISA 3.1C and AVR DS40002198B. Each imported reference explains what the mnemonic does, gives a concrete use case, and instantiates syntax when the template allows it. It also presents data flow, operands, flags, variants, and required features, while identifying missing metadata. The simulator executes three 64-bit integer subsets: AMD64, A64 and RV64I. It does not model memory, exceptions, privileges, floating point, SIMD, real pipelines or binary instructions. Other architectures have references but no execution engine. Official links remain authoritative for exact semantics, forms, extensions and exceptions.",
+        "Les sept profils donnent accès à des catalogues versionnés : Intel XED, Arm A64 2025-09 ASL1, RISC-V ratifié, SPARC V8, Power ISA 3.1C et AVR DS40002198B. Chaque référence explique la fonction du mnémonique, donne un cas d’usage, détaille les opérandes et propose un mini testeur. Celui-ci calcule exactement les opérations scalaires simples ; les formes mémoire, système, atomiques, flottantes et vectorielles affichent un modèle pédagogique clairement identifié. Le laboratoire exécute trois sous-ensembles entiers 64 bits : AMD64, A64 et RV64I. Il ne simule ni mémoire, exceptions, privilèges, flottants, SIMD, pipelines réels ni instructions binaires. Les liens officiels font autorité pour la sémantique exacte, les formes, extensions et exceptions.",
+        "The seven profiles provide versioned catalogues: Intel XED, Arm A64 2025-09 ASL1, ratified RISC-V, SPARC V8, Power ISA 3.1C and AVR DS40002198B. Each reference explains its mnemonic, gives a use case, details operands, and provides a mini tester. The tester calculates simple scalar operations exactly; memory, system, atomic, floating-point, and vector forms display a clearly identified teaching model. The lab executes three 64-bit integer subsets: AMD64, A64 and RV64I. It does not model memory, exceptions, privileges, floating point, SIMD, real pipelines or binary instructions. Official links remain authoritative for exact semantics, forms, extensions and exceptions.",
       ),
     ],
     [

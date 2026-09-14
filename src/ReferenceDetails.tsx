@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight, BookOpen, CircleAlert, Cpu, Database, GitBran
 import { catalogs, type ReferenceEntry, type ReferenceForm } from "./catalog";
 import type { Lang } from "./data";
 import { concreteSyntax, extractOperands, flagDetails, instructionGuide, localize, type InstructionClass } from "./instructionDocs";
+import { MiniTester } from "./MiniTester";
 
 const icons: Record<InstructionClass, typeof Cpu> = {
   control: GitBranch, memory: Database, atomic: Database, conversion: ArrowRight,
@@ -10,7 +11,7 @@ const icons: Record<InstructionClass, typeof Cpu> = {
   system: Cpu, floating: Cpu, vector: Cpu, other: Cpu,
 };
 
-export function ReferenceDetails({ arch, entry, lang }: { arch: string; entry: ReferenceEntry; lang: Lang }) {
+export function ReferenceDetails({ arch, bits, entry, lang, showTester = true }: { arch: string; bits: number; entry: ReferenceEntry; lang: Lang; showTester?: boolean }) {
   const t = (fr: string, en: string) => lang === "fr" ? fr : en;
   const [family, setFamily] = useState("all");
   const [lessonStage, setLessonStage] = useState(0);
@@ -85,6 +86,7 @@ export function ReferenceDetails({ arch, entry, lang }: { arch: string; entry: R
       <div className="supported">{entry.families.map((item) => <span key={item} className="pill">{item}</span>)}</div>
       <a className="text-link" href={catalog.source} target="_blank" rel="noreferrer">{t("Manuel de l’architecture", "Architecture manual")}<ArrowUpRight size={16} /></a>
     </div>
+    {showTester && <MiniTester entry={entry} bits={bits} lang={lang} />}
 
     <div className="reference-heading">
       <h2>{forms.length} {t("formes référencées", "referenced forms")}</h2>

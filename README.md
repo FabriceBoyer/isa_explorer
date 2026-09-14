@@ -38,7 +38,9 @@ npm run test:e2e     # Navigation, édition, exécution, langue, thème, mobile
 
 L’ISA est le contrat logiciel, la microarchitecture est sa réalisation matérielle. AMD64 et Intel 64 appartiennent à la même famille ; « x86 » désigne ici précisément IA-32 pour permettre la comparaison avec le mode 64 bits.
 
-Le catalogue comporte **29 fiches rédigées à la main**, enrichies par un catalogue versionné de plusieurs milliers de mnémoniques avec filtres par famille, recherche et pagination. Toutes les instructions disposent d’une fiche guidée interactive en quatre étapes : besoin, opérandes, exécution et résultat. Chaque page explique à quoi sert le mnémonique, donne un cas d’usage concret avec des valeurs, puis instancie la syntaxe avec des registres et constantes quand le gabarit source le permet. Elle fournit aussi un repère fonctionnel bilingue, un chemin conceptuel des données, les variantes, un tableau d’opérandes, les accès lecture/écriture disponibles, les indicateurs décodés, les capacités requises et un lien vers la définition normative. Une absence de métadonnée est signalée explicitement au lieu d’être interprétée comme une absence d’effet. Le détail des sources, versions, limites et commandes de régénération figure dans [catalog-sources.md](catalog-sources.md). Les instructions arithmétiques sélectionnées ont un mini-modèle interactif. Les schémas de circulation sont conceptuels, pas des modèles de performance.
+Le catalogue comporte **29 fiches rédigées à la main**, enrichies par un catalogue versionné de plusieurs milliers de mnémoniques avec filtres par famille, recherche et pagination. Toutes les instructions disposent d’une fiche guidée interactive en quatre étapes : besoin, opérandes, exécution et résultat. Chaque page explique à quoi sert le mnémonique, donne un cas d’usage concret avec des valeurs, puis instancie la syntaxe avec des registres et constantes quand le gabarit source le permet. Elle fournit aussi un repère fonctionnel bilingue, un chemin conceptuel des données, les variantes, un tableau d’opérandes, les accès lecture/écriture disponibles, les indicateurs décodés, les capacités requises et un lien vers la définition normative. Une absence de métadonnée est signalée explicitement au lieu d’être interprétée comme une absence d’effet. Le détail des sources, versions, limites et commandes de régénération figure dans [catalog-sources.md](catalog-sources.md).
+
+Chaque fiche possède également un **mini testeur universel** avec deux sources modifiables, un choix de largeur 8/16/32/64 bits, les vues décimale, hexadécimale et binaire, ainsi que des indicateurs Z/N/C pédagogiques. Les additions, soustractions, multiplications, divisions, opérations logiques, décalages, rotations, comparaisons et comptages de bits sont calculés directement. Les instructions mémoire, atomiques, vectorielles, flottantes, système et les formes spécialisées utilisent un modèle de famille clairement signalé ; il illustre le chemin des données sans prétendre remplacer l’émulation exacte du manuel.
 
 ## Utiliser le laboratoire
 
@@ -107,6 +109,8 @@ Pour demander une validation obligatoire avant fusion, activer la protection de 
 ```text
 src/data.ts          Profils, fiches et textes FR/EN, références officielles
 src/instructionDocs.ts Classification, opérandes et indicateurs des références
+src/miniTester.ts      Modèles de calcul du mini testeur universel
+src/MiniTester.tsx     Interface interactive du mini testeur
 src/engine.ts        Parseur et machine entière, fonctions pures
 src/engine.test.ts   Algorithmes, débordements, erreurs, immutabilité, limites
 src/main.tsx         Navigation, catalogue, fiches, laboratoire et aide
