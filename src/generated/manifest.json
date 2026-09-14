@@ -1,0 +1,24 @@
+{
+  "generatedOn": "2026-09-14",
+  "xedCommit": "0bcb6237345c5066726dcc08b3d87928df3b5b26",
+  "riscvCommit": "f5befa291a2562f3194921265b7f5ac5681bc8b0",
+  "armVersion": "2025-09_ASL1",
+  "avrDescriptions": 124,
+  "armIndexedForms": 2760,
+  "powerTableRows": 1180,
+  "counts": {
+    "amd64": 1906,
+    "x86": 1750,
+    "arm64": 1668,
+    "riscv": 1045,
+    "sparc": 200,
+    "power": 1399,
+    "avr": 119
+  },
+  "sha256": {
+    "arm.tar.gz": "1485163c09c0a22b37bfec7af28add009d39f61bc3648fc1686543c6eecdd91d",
+    "avr.pdf": "3b5e1d0ed09f80001e2ebbefdcc8aa97a4e4aa7ecc9df0c66fa0478360a9e05a",
+    "sparcv8-real.pdf": "aa56853fb52d6076e4d4752e173159b63f3a3131a7880f262bc262711549bd76",
+    "power.pdf": "56372d23ece7e9e2c1b381a639443982a3e16e38109df1c141d655b779b61fdb"
+  }
+}

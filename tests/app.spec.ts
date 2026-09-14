@@ -6,7 +6,7 @@ test("exploration, filtering, reference and direct lab link", async ({
   await expect(
     page.getByRole("heading", { name: "De l’instruction à la compréhension." }),
   ).toBeVisible();
-  await expect(page.locator(".architecture-card")).toHaveCount(8);
+  await expect(page.locator(".architecture-card")).toHaveCount(7);
   await page.getByRole("button", { name: "CISC", exact: true }).click();
   await expect(page.locator(".architecture-card")).toHaveCount(2);
   await page
@@ -104,4 +104,23 @@ test("dark surfaces and text follow manual and system theme across pages", async
   await page.getByRole("button", { name: "Thème light" }).click();
   await expect(page.locator("html")).toHaveCSS("background-color", "rgb(246, 247, 251)");
   await expect(page.locator("html")).toHaveCSS("color", "rgb(37, 48, 74)");
+});
+
+test('complete AVR catalogue, extension filters and encoded instruction routes', async ({page}) => {
+ await page.goto('/#/architecture/avr');
+ await expect(page.getByRole('link',{name:/LEON/})).toHaveCount(0);
+ await page.getByRole('textbox',{name:'Rechercher une instruction AVR'}).fill('SLEEP');
+ await page.locator('.instruction-table a').click();
+ await expect(page.locator('h1')).toHaveText('SLEEP');
+ await expect(page.getByRole('heading',{name:'Référence technique'})).toBeVisible();
+ await expect(page.locator('.reference-form a')).toHaveAttribute('href',/DS40002198\.pdf#page=132/);
+ await page.goto('/#/architecture/arm64');
+ await page.getByRole('combobox',{name:'Extension ARM64',exact:true}).selectOption('SVE');
+ await page.getByRole('textbox',{name:'Rechercher une instruction ARM64'}).fill('PTRUE');
+ await page.locator('a[href="#/architecture/arm64/PTRUE"]').click();
+ await expect(page.locator('h1')).toHaveText('PTRUE');
+ await page.goto('/#/architecture/arm64/B.COND');
+ await expect(page.locator('h1')).toHaveText('B.COND');
+ await page.goto('/#/lab');
+ await expect(page.locator('.supported a')).toHaveCount(6);
 });

@@ -1,3 +1,4 @@
+import { attachCatalog, type ReferenceEntry } from "./catalog";
 export type Lang = "fr" | "en";
 export type Text = { fr: string; en: string };
 export const bi = (fr: string, en: string): Text => ({ fr, en });
@@ -18,7 +19,9 @@ export type Architecture = {
 };
 export type Instruction = {
   name: string;
-  kind: "data" | "math" | "logic" | "flow";
+  kind: "data" | "math" | "logic" | "flow" | "reference";
+  reference?: ReferenceEntry;
+  guided?: boolean;
   title: Text;
   syntax: string;
   effect: string;
@@ -54,6 +57,7 @@ function ins(
 ): Instruction {
   return {
     name,
+    guided: true,
     kind,
     title,
     syntax,
@@ -502,28 +506,7 @@ export const architectures: Architecture[] = [
       "SPARC V8 expose 8 registres globaux, 8 d’entrée, 8 locaux et 8 de sortie. %g0 vaut zéro. SAVE et RESTORE changent de fenêtre. Les branchements ont un delay slot ; V9 est l’évolution 64 bits, non couverte par cette fiche.",
       "SPARC V8 exposes eight global, eight input, eight local and eight output registers. %g0 is zero. SAVE and RESTORE change windows. Branches have a delay slot; V9 is the 64-bit evolution, outside this profile.",
     ),
-    source: "https://www.gaisler.com/doc/sparcv8.pdf",
-    instructions: sparcInstructions,
-  },
-  {
-    id: "leon",
-    name: "LEON",
-    subtitle: "LEON3 · SPARC V8",
-    bits: 32,
-    family: "RISC",
-    year: "2004",
-    color: "#a185ec",
-    registers: "32 visible",
-    use: bi("Spatial & systèmes critiques", "Space & critical systems"),
-    description: bi(
-      "L’architecture SPARC prend son envol. Découvrez une implémentation conçue pour l’embarqué.",
-      "SPARC takes flight. Discover an implementation designed for embedded systems.",
-    ),
-    detail: bi(
-      "LEON3 est un cœur processeur implémentant SPARC V8, pas une ISA indépendante. Son pipeline à sept étages et ses caches relèvent de la microarchitecture. Les variantes FT ajoutent des mécanismes de tolérance aux fautes.",
-      "LEON3 is a processor core implementing SPARC V8, not an independent ISA. Its seven-stage pipeline and caches are microarchitectural features. FT variants add fault-tolerance mechanisms.",
-    ),
-    source: "https://www.gaisler.com/products/leon3",
+    source: "https://download.gaisler.com/technical_notes/external/sparc_manuals/sparcv8.pdf",
     instructions: sparcInstructions,
   },
   {
@@ -642,7 +625,10 @@ export const architectures: Architecture[] = [
     ],
   },
 ];
+attachCatalog(architectures);
+
 export const categories = {
+  reference: bi("Référence", "Reference"),
   data: bi("Transfert", "Data transfer"),
   math: bi("Arithmétique", "Arithmetic"),
   logic: bi("Logique", "Logic"),

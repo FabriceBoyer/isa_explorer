@@ -4,3 +4,7 @@ dist
 .github
 *.tsbuildinfo
 .env*
+.cache
+__pycache__
+test-results
+playwright-report

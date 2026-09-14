@@ -42,6 +42,8 @@ import {
   type Machine,
   type Program,
 } from "./engine";
+import { catalogs, simulatedMnemonics } from "./catalog";
+import { ReferenceDetails } from "./ReferenceDetails";
 import "./style.css";
 function stored(key: string, fallback: string) {
   try {
@@ -126,7 +128,7 @@ function App() {
             >
               <Icon size={19} />
               {label}
-              {href === "/" && <span className="nav-count">8</span>}
+              {href === "/" && <span className="nav-count">{architectures.length}</span>}
             </a>
           ))}
         </nav>
@@ -208,9 +210,10 @@ function App() {
           ) : section === "architecture" && architecture ? (
             instruction ? (
               <InstructionPage
+                key={architecture.id + instruction}
                 a={architecture}
                 item={architecture.instructions.find(
-                  (i) => i.name === instruction,
+                  (i) => encodeURIComponent(i.name) === instruction,
                 )}
                 lang={lang}
               />
@@ -342,7 +345,7 @@ function Explorer({ lang }: { lang: Lang }) {
       <div className="stats">
         <div>
           <Layers />
-          <strong>8</strong>
+          <strong>{architectures.length}</strong>
           <span>
             {t("architectures à explorer", "architectures to explore")}
           </span>
@@ -352,7 +355,7 @@ function Explorer({ lang }: { lang: Lang }) {
           <strong>
             {architectures.reduce((s, a) => s + a.instructions.length, 0)}
           </strong>
-          <span>{t("fiches pédagogiques", "learning references")}</span>
+          <span>{t("instructions référencées", "indexed instructions")}</span>
         </div>
         <div>
           <FlaskConical />
@@ -570,11 +573,11 @@ function ArchitecturePage({ a, lang }: { a: Architecture; lang: Lang }) {
       <h2>{t("Les instructions, expliquées", "Instructions, explained")}</h2>
       <p className="subtle">
         {t(
-          "Sélection pédagogique : chaque fiche couvre la forme affichée, pas toutes les extensions de l’ISA.",
-          "Curated learning selection: each reference covers the displayed form, not all ISA extensions.",
+          "Catalogue des instructions et extensions de la version indiquée. Les fiches guidées et les formes de référence sont distinguées.",
+          "Instruction and extension catalogue for the named version. Guided references and source forms are distinguished.",
         )}
       </p>
-      <InstructionTable a={a} lang={lang} />
+      <InstructionTable key={a.id} a={a} lang={lang} />
     </>
   );
 }
@@ -619,24 +622,37 @@ function Cycle({ lang }: { lang: Lang }) {
   );
 }
 function InstructionTable({ a, lang }: { a: Architecture; lang: Lang }) {
-  return (
-    <div className="instruction-table">
-      {a.instructions.map((i) => (
-        <a key={i.name} href={`#/architecture/${a.id}/${i.name}`}>
-          <code>{i.name}</code>
-          <span>
-            {i.title[lang]}
-            <small>{i.syntax}</small>
-          </span>
-          <span className="pill neutral">{categories[i.kind][lang]}</span>
-          <ArrowUpRight size={17} />
-        </a>
-      ))}
+  const t = (fr: string, en: string) => lang === "fr" ? fr : en;
+  const [query, setQuery] = useState("");
+  const [family, setFamily] = useState("all");
+  const [guided, setGuided] = useState(false);
+  const [page, setPage] = useState(0);
+  const families = [...new Set(a.instructions.flatMap(i => i.reference?.families || []))].sort();
+  const filtered = a.instructions.filter(i => (!guided || i.guided) &&
+    (family === "all" || i.reference?.families.includes(family)) &&
+    `${i.name} ${i.title[lang]} ${i.reference?.families.join(' ') || ''}`.toLowerCase().includes(query.toLowerCase()));
+  const pages = Math.max(1, Math.ceil(filtered.length / 30));
+  const current = Math.min(page, pages - 1);
+  return <div className="instruction-browser">
+    <p className="subtle">{catalogs[a.id]?.version} · {filtered.length} {t("instructions", "instructions")}</p>
+    <div className="instruction-filters">
+      <label className="search"><Search size={16}/><input aria-label={t("Rechercher une instruction ","Search instructions ")+a.name} value={query} onChange={e => {setQuery(e.target.value);setPage(0);}} placeholder={t("Mnémonique, extension…","Mnemonic, extension…")}/></label>
+      <select aria-label={t("Extension ","Extension ")+a.name} value={family} onChange={e=>{setFamily(e.target.value);setPage(0);}}><option value="all">{t("Toutes les familles / extensions","All families / extensions")}</option>{families.map(f=><option key={f}>{f}</option>)}</select>
+      <label className="guided-filter"><input type="checkbox" checked={guided} onChange={e=>{setGuided(e.target.checked);setPage(0);}}/>{t("Fiches guidées","Guided references")}</label>
     </div>
-  );
+    <div className="instruction-table">
+      {filtered.slice(current * 30, (current + 1) * 30).map(i=><a key={i.name} href={`#/architecture/${a.id}/${encodeURIComponent(i.name)}`}>
+        <code>{i.name}</code><span>{i.title[lang]}<small>{i.syntax}</small></span>
+        <span className="pill neutral">{i.guided?t("Guidée","Guided"):t("Référence","Reference")}</span><ArrowUpRight size={17}/>
+      </a>)}
+      {!filtered.length && <div className="empty">{t("Aucune instruction ne correspond à ces filtres.","No instruction matches these filters.")}</div>}
+    </div>
+    {pages>1&&<div className="pagination"><button className="button secondary" disabled={current===0} onClick={()=>setPage(current-1)}>{t("Précédent","Previous")}</button><span>{current+1} / {pages}</span><button className="button secondary" disabled={current===pages-1} onClick={()=>setPage(current+1)}>{t("Suivant","Next")}</button></div>}
+  </div>;
 }
 function InstructionIndex({ lang }: { lang: Lang }) {
   const [q, setQ] = useState("");
+  const [archFilter, setArchFilter] = useState("all");
   return (
     <>
       <div className="eyebrow purple">
@@ -647,8 +663,8 @@ function InstructionIndex({ lang }: { lang: Lang }) {
       </h1>
       <p className="lead">
         {lang === "fr"
-          ? "Une sélection documentée de formes usuelles, avec effets sur les registres et exemples."
-          : "A documented selection of common forms, with register effects and examples."}
+          ? "Recherchez parmi les catalogues versionnés : jeux de base, extensions et fiches guidées."
+          : "Search versioned catalogues: base instruction sets, extensions and guided references."}
       </p>
       <label className="search wide">
         <Search size={18} />
@@ -662,7 +678,8 @@ function InstructionIndex({ lang }: { lang: Lang }) {
           }
         />
       </label>
-      {architectures
+      <select aria-label={lang === "fr" ? "Architecture du catalogue" : "Catalogue architecture"} value={archFilter} onChange={e=>setArchFilter(e.target.value)}><option value="all">{lang === "fr" ? "Toutes les architectures" : "All architectures"}</option>{architectures.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+      {architectures.filter(a=>archFilter === "all" || a.id === archFilter)
         .map((a) => ({
           ...a,
           instructions: a.instructions.filter((i) =>
@@ -675,7 +692,7 @@ function InstructionIndex({ lang }: { lang: Lang }) {
         .map((a) => (
           <section key={a.id}>
             <h2>{a.name}</h2>
-            <InstructionTable a={a} lang={lang} />
+            <InstructionTable key={a.id} a={a} lang={lang} />
           </section>
         ))}
     </>
@@ -696,6 +713,12 @@ function InstructionPage({
   const [done, setDone] = useState(false);
   if (!item)
     return <h1>{t("Instruction introuvable", "Instruction not found")}</h1>;
+  if (!item.guided && item.reference) return <>
+    <a className="back" href={"#/architecture/" + a.id}>← {a.name}</a>
+    <div className="eyebrow purple">{a.name} · {t("Catalogue des instructions", "Instruction catalogue")}</div>
+    <h1><code>{item.name}</code></h1>
+    <ReferenceDetails key={a.id+item.name} arch={a.id} entry={item.reference} lang={lang}/>
+  </>;
   const arithmetic = ["ADD", "SUB", "XOR", "EOR"].includes(item.name);
   const raw =
     item.name === "SUB"
@@ -742,9 +765,7 @@ function InstructionPage({
           </p>
           <a
             href={
-              a.id === "leon"
-                ? "https://www.gaisler.com/doc/sparcv8.pdf"
-                : a.source
+              a.source
             }
             target="_blank"
             rel="noreferrer"
@@ -758,6 +779,7 @@ function InstructionPage({
           </a>
         </section>
       </div>
+      {item.reference && <details className="reference-expander"><summary>{t("Toutes les formes et extensions référencées", "All referenced forms and extensions")}</summary><ReferenceDetails key={a.id+item.name} arch={a.id} entry={item.reference} lang={lang}/></details>}
       {arithmetic && (
         <section className="panel">
           <h2>{t("Faites circuler les données", "Make the data flow")}</h2>
@@ -1132,7 +1154,7 @@ function Lab({ lang }: { lang: Lang }) {
         <div className="supported">
           {architectures
             .find((a) => a.id === isa)
-            ?.instructions.map((i) => (
+            ?.instructions.filter(i => simulatedMnemonics[isa]?.includes(i.name)).map((i) => (
               <a
                 className="pill"
                 key={i.name}
@@ -1160,8 +1182,8 @@ function Help({ lang }: { lang: Lang }) {
     [
       t("ISA ou microarchitecture ?", "ISA or microarchitecture?"),
       t(
-        "L’ISA est le contrat visible par le logiciel : instructions, registres et comportement mémoire. La microarchitecture est sa réalisation : pipeline, caches, prédiction et unités de calcul. Deux processeurs peuvent exécuter la même ISA avec des performances très différentes. LEON implémente SPARC V8 ; AMD64 et Intel 64 désignent la même famille x86-64.",
-        "The ISA is the contract visible to software: instructions, registers and memory behavior. Microarchitecture is its implementation: pipelines, caches, prediction and execution units. Two processors can execute the same ISA with very different performance. LEON implements SPARC V8; AMD64 and Intel 64 name the same x86-64 family.",
+        "L’ISA est le contrat visible par le logiciel : instructions, registres et comportement mémoire. La microarchitecture est sa réalisation : pipeline, caches, prédiction et unités de calcul. Deux processeurs peuvent exécuter la même ISA avec des performances très différentes. AMD64 et Intel 64 désignent la même famille x86-64.",
+        "The ISA is the contract visible to software: instructions, registers and memory behavior. Microarchitecture is its implementation: pipelines, caches, prediction and execution units. Two processors can execute the same ISA with very different performance. AMD64 and Intel 64 name the same x86-64 family.",
       ),
     ],
     [
@@ -1195,8 +1217,8 @@ function Help({ lang }: { lang: Lang }) {
     [
       t("Couverture et limites", "Coverage and limitations"),
       t(
-        "Les huit profils sont une introduction et les fiches une sélection, pas un inventaire exhaustif des ISA. Le simulateur exécute trois sous-ensembles entiers 64 bits : AMD64, A64 et RV64I. Il ne simule ni mémoire, exceptions, privilèges, flottants, SIMD, pipelines réels ni instructions binaires. Les autres architectures disposent de fiches mais pas de moteur. Les liens officiels font autorité pour les formes, extensions et exceptions.",
-        "The eight profiles are an introduction and the references a selection, not exhaustive ISA inventories. The simulator executes three 64-bit integer subsets: AMD64, A64 and RV64I. It does not model memory, exceptions, privileges, floating point, SIMD, real pipelines or binary instructions. Other architectures have references but no execution engine. Official links are authoritative for forms, extensions and exceptions.",
+        "Les sept profils donnent accès à des catalogues versionnés : Intel XED, Arm A64 2025-09 ASL1, RISC-V ratifié, SPARC V8, Power ISA 3.1C et AVR DS40002198B. Les références indexent les mnémoniques et renvoient à leurs définitions ; les fiches guidées ajoutent des explications et des exemples. Le simulateur exécute trois sous-ensembles entiers 64 bits : AMD64, A64 et RV64I. Il ne simule ni mémoire, exceptions, privilèges, flottants, SIMD, pipelines réels ni instructions binaires. Les autres architectures disposent de fiches mais pas de moteur. Les liens officiels font autorité pour les formes, extensions et exceptions.",
+        "The seven profiles provide versioned catalogues: Intel XED, Arm A64 2025-09 ASL1, ratified RISC-V, SPARC V8, Power ISA 3.1C and AVR DS40002198B. References index mnemonics and link to their definitions; guided references add explanations and examples. The simulator executes three 64-bit integer subsets: AMD64, A64 and RV64I. It does not model memory, exceptions, privileges, floating point, SIMD, real pipelines or binary instructions. Other architectures have references but no execution engine. Official links are authoritative for forms, extensions and exceptions.",
       ),
     ],
     [
@@ -1237,8 +1259,8 @@ function Help({ lang }: { lang: Lang }) {
         <h2>{t("Sources primaires", "Primary sources")}</h2>
         <p>
           {t(
-            "Fiches de synthèse rédigées pour cet outil. Sources consultées le 13 septembre 2026 ; les spécifications peuvent évoluer.",
-            "Summaries written for this tool. Sources consulted on September 13, 2026; specifications may evolve.",
+            "Fiches guidées originales et index techniques issus des sources officielles. Sources consultées le 14 septembre 2026 ; les versions et périmètres sont indiqués dans les catalogues.",
+            "Original guided references and technical indexes from official sources. Sources consulted on September 14, 2026; versions and scopes are shown in the catalogues.",
           )}
         </p>
         <div className="sources">

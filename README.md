@@ -33,13 +33,12 @@ npm run test:e2e     # Navigation, édition, exécution, langue, thème, mobile
 | RISC-V    | Introduction RV32I/RV64I       | 32 × XLEN, x0 constant | Sous-ensemble RV64I |
 | x86       | IA-32, 32 bits                 | 8 × 32 bits            | Fiches uniquement   |
 | SPARC     | V8, 32 bits                    | 32 visibles, fenêtres  | Fiches uniquement   |
-| LEON      | LEON3, implémentation SPARC V8 | Fenêtres SPARC         | Fiches uniquement   |
 | Power ISA | Profil entier 64 bits          | 32 × 64 bits           | Fiches uniquement   |
 | AVR       | Famille 8 bits                 | 32 × 8 bits            | Fiches uniquement   |
 
-L’ISA est le contrat logiciel, la microarchitecture est sa réalisation matérielle. LEON n’est donc pas une ISA distincte. AMD64 et Intel 64 appartiennent à la même famille ; « x86 » désigne ici précisément IA-32 pour permettre la comparaison avec le mode 64 bits.
+L’ISA est le contrat logiciel, la microarchitecture est sa réalisation matérielle. AMD64 et Intel 64 appartiennent à la même famille ; « x86 » désigne ici précisément IA-32 pour permettre la comparaison avec le mode 64 bits.
 
-Le catalogue comporte **32 fiches pédagogiques** (certaines instructions sont présentées pour plusieurs architectures), pas un inventaire exhaustif des milliers de formes et extensions disponibles. Chaque fiche décrit la forme affichée, sa syntaxe, ses effets, ses indicateurs, un exemple, des limites et une source primaire. Les instructions arithmétiques sélectionnées ont un mini-modèle interactif. Les schémas fetch/decode/execute/write sont conceptuels, pas des modèles de performance.
+Le catalogue comporte **29 fiches pédagogiques**, enrichies par un catalogue versionné de plusieurs milliers de mnémoniques avec filtres par famille, recherche et pagination. Les nouvelles pages de référence exposent les métadonnées et liens officiels ; elles ne constituent pas toutes des tutoriels animés ou des instructions exécutables. Le détail des sources, versions, limites et commandes de régénération figure dans [catalog-sources.md](catalog-sources.md). Chaque fiche pédagogique décrit la forme affichée, sa syntaxe, ses effets, ses indicateurs, un exemple, des limites et une source primaire. Les instructions arithmétiques sélectionnées ont un mini-modèle interactif. Les schémas fetch/decode/execute/write sont conceptuels, pas des modèles de performance.
 
 ## Utiliser le laboratoire
 
@@ -129,8 +128,7 @@ Sources consultées le 13 septembre 2026. Les synthèses sont originales et ne r
 - [Intel SDM : IA-32 et Intel 64](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
 - [Arm A64 Instruction Set](https://developer.arm.com/documentation/ddi0602/latest/)
 - [RISC-V Unprivileged ISA](https://docs.riscv.org/reference/isa/unpriv/unpriv-index.html)
-- [SPARC V8 Architecture Manual](https://www.gaisler.com/doc/sparcv8.pdf)
-- [Gaisler LEON3](https://www.gaisler.com/products/leon3)
+- [SPARC V8 Architecture Manual](https://download.gaisler.com/technical_notes/external/sparc_manuals/sparcv8.pdf)
 - [IBM instruction set reference](https://www.ibm.com/docs/en/aix/7.3.0?topic=reference-instruction-set)
 - [Microchip AVR Instruction Set Manual](https://ww1.microchip.com/downloads/en/DeviceDoc/AVR-InstructionSet-Manual-DS40002198.pdf)
 
@@ -138,7 +136,7 @@ Une page d’aide intégrée (`#/help`) explique les notions, le laboratoire, la
 
 ## English guide
 
-ISA Explorer is a frontend-only educational React/TypeScript/Vite site. It introduces eight architecture profiles, 32 curated instruction references and editable step-by-step simulations for AMD64, A64 and RV64I. It is **not an exhaustive instruction database or a hardware emulator**.
+ISA Explorer is a frontend-only educational React/TypeScript/Vite site. It introduces seven architecture profiles, 29 curated instruction tutorials and thousands of versioned instruction references and editable step-by-step simulations for AMD64, A64 and RV64I. See [catalogue coverage and regeneration](catalog-sources.md) for pinned versions and extraction limits. The simulator supports only the subset listed above.
 
 Run `npm ci && npm run dev`. Build with `npm run build`; verify with `npm run check`, `npm test`, and `npm run test:e2e` after installing Chromium with `npx playwright install --with-deps chromium`. Docker: `docker compose up --build -d --wait`, then open `http://localhost:8080`. Change the port using `ISA_PORT`.
 
