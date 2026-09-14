@@ -21,9 +21,9 @@ export const catalogs = rawCatalog as Record<string, Catalog>;
 
 /** The catalogue is broader than the execution engine. Never infer support from it. */
 export const simulatedMnemonics: Record<string, string[]> = {
-  amd64: ['MOV', 'ADD', 'SUB', 'XOR', 'CMP', 'JNZ'],
-  arm64: ['MOV', 'ADD', 'SUB', 'EOR', 'CBNZ'],
-  riscv: ['ADDI', 'ADD', 'SUB', 'XOR', 'BNE'],
+  amd64: ['MOV', 'ADD', 'SUB', 'XOR', 'AND', 'OR', 'SHL', 'SHR', 'CMP', 'JNZ', 'JZ'],
+  arm64: ['MOV', 'ADD', 'SUB', 'EOR', 'AND', 'ORR', 'LSL', 'LSR', 'CBNZ', 'CBZ'],
+  riscv: ['ADDI', 'ANDI', 'ORI', 'SLLI', 'SRLI', 'ADD', 'SUB', 'XOR', 'BNE', 'BEQ'],
 };
 
 export function attachCatalog(architectures: Architecture[]) {

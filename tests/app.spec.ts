@@ -56,6 +56,22 @@ test("executes each ISA and edits inputs", async ({ page }) => {
     page.getByRole("button", { name: "Exécuter", exact: true }),
   ).toBeDisabled();
 });
+test("runs the advanced playground demonstrations", async ({ page }) => {
+  await page.goto("/#/lab");
+  const algorithm = page.getByRole("combobox", { name: "Algorithme" });
+  await expect(algorithm.locator("option")).toHaveCount(7);
+  await page.getByLabel("Donnée initiale n (0–100)").fill("5");
+  await algorithm.selectOption("fibonacci");
+  await page.getByRole("combobox", { name: "Vitesse" }).selectOption("250");
+  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Exécution terminée", { timeout: 25000 });
+  await expect(page.locator(".register").filter({ hasText: /^RAX/ }).locator("strong")).toHaveText("5");
+  await algorithm.selectOption("popcount");
+  await page.getByLabel("Donnée initiale n (0–100)").fill("7");
+  await page.getByRole("button", { name: "Exécuter", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Exécution terminée", { timeout: 25000 });
+  await expect(page.locator(".register").filter({ hasText: /^RAX/ }).locator("strong")).toHaveText("3");
+});
 test("English, theme, documentation and mobile layout", async ({ page }) => {
   await page.goto("/#/architecture/amd64/ADD");
   await page.getByRole("button", { name: "Exécuter l’opération" }).click();
@@ -122,5 +138,5 @@ test('complete AVR catalogue, extension filters and encoded instruction routes',
  await page.goto('/#/architecture/arm64/B.COND');
  await expect(page.locator('h1')).toHaveText('B.COND');
  await page.goto('/#/lab');
- await expect(page.locator('.supported a')).toHaveCount(6);
+ await expect(page.locator('.supported a')).toHaveCount(11);
 });

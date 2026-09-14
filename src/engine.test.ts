@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { example, initial, parse, step, type ISA } from "./engine";
+import { algorithms, example, initial, parse, step, type ISA } from "./engine";
 const isas: ISA[] = ["amd64", "arm64", "riscv"];
 function execute(isa: ISA, code: string, n = "5") {
   const p = parse(code, isa);
@@ -8,6 +8,9 @@ function execute(isa: ISA, code: string, n = "5") {
   return s;
 }
 describe.each(isas)("%s algorithms", (isa) => {
+  const result = (s: ReturnType<typeof initial>) =>
+    s.registers[isa === "amd64" ? "RAX" : isa === "arm64" ? "X0" : "x2"];
+
   it.each([0, 1, 5, 100])("sums 0 through %i", (n) => {
     const s = execute(isa, example(isa, "sum"), String(n));
     expect(
@@ -29,6 +32,32 @@ describe.each(isas)("%s algorithms", (isa) => {
       s.registers[isa === "amd64" ? "RBX" : isa === "arm64" ? "X2" : "x3"],
     ).toBe(17n);
   });
+  it.each([
+    [0, 0n],
+    [1, 1n],
+    [2, 1n],
+    [10, 55n],
+  ])("computes Fibonacci(%i)", (n, expected) => {
+    expect(result(execute(isa, example(isa, "fibonacci"), String(n)))).toBe(expected);
+  });
+  it.each([
+    [0, 0n],
+    [5, 2n],
+    [100, 3n],
+  ])("counts the set bits of %i", (n, expected) => {
+    expect(result(execute(isa, example(isa, "popcount"), String(n)))).toBe(expected);
+  });
+  it("computes a power of two with a shift loop", () => {
+    expect(result(execute(isa, example(isa, "power2"), "12"))).toBe(4096n);
+  });
+  it("packs a masked nibble and fixed flags", () => {
+    expect(result(execute(isa, example(isa, "bitpack"), "42"))).toBe(163n);
+  });
+});
+it("exposes seven complete demonstrations", () => {
+  expect(algorithms).toHaveLength(7);
+  for (const algorithm of algorithms)
+    for (const isa of isas) expect(() => parse(example(isa, algorithm.id), isa)).not.toThrow();
 });
 it("wraps at 64 bits exactly and updates ZF", () => {
   const s = execute("amd64", "MOV RAX, 18446744073709551615\nADD RAX, 1");
@@ -67,6 +96,10 @@ it("rejects unknown ARM source registers", () =>
   expect(() => parse("ADD X0, X99, X2", "arm64")).toThrow());
 it("rejects out-of-range RISC-V immediates", () =>
   expect(() => parse("ADDI x1, x0, 2048", "riscv")).toThrow());
+it("rejects out-of-range immediate shift counts", () => {
+  expect(() => parse("SLLI x1, x1, 64", "riscv")).toThrow();
+  expect(() => parse("LSR X1, X1, #64", "arm64")).toThrow();
+});
 it.each(["-1", "101", "1.5", "", "NaN"])("rejects input %s", (n) =>
   expect(() => initial("amd64", n)).toThrow(),
 );

@@ -38,9 +38,9 @@ it('covers vector, privileged, floating and record variants',()=>{
   for(const name of names)expect(catalogs[arch].entries.some(e=>e.name===name),`${arch}: ${name}`).toBe(true);
 });
 it('never turns metadata into executable instructions',()=>{
- expect(simulatedMnemonics.amd64).toHaveLength(6);
- expect(simulatedMnemonics.arm64).toHaveLength(5);
- expect(simulatedMnemonics.riscv).toHaveLength(5);
+ expect(simulatedMnemonics.amd64).toHaveLength(11);
+ expect(simulatedMnemonics.arm64).toHaveLength(10);
+ expect(simulatedMnemonics.riscv).toHaveLength(10);
  expect(simulatedMnemonics.avr).toBeUndefined();
 });
 it('preserves the guided references and their examples',()=>{

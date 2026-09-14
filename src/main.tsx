@@ -38,7 +38,9 @@ import {
   parse,
   step,
   example,
+  algorithms,
   type ISA,
+  type AlgorithmKind,
   type Machine,
   type Program,
 } from "./engine";
@@ -847,7 +849,7 @@ function Lab({ lang }: { lang: Lang }) {
       ? (requested as ISA)
       : "amd64",
   );
-  const [kind, setKind] = useState("sum");
+  const [kind, setKind] = useState<AlgorithmKind>("sum");
   const [input, setInput] = useState("5");
   const [code, setCode] = useState(() => example(isa, "sum"));
   const [history, setHistory] = useState<Machine[]>(() => [initial(isa)]);
@@ -856,6 +858,7 @@ function Lab({ lang }: { lang: Lang }) {
   const [speed, setSpeed] = useState(700);
   const [hex, setHex] = useState(false);
   const state = history[history.length - 1];
+  const algorithm = algorithms.find((item) => item.id === kind)!;
   let program: Program | undefined;
   try {
     program = parse(code, isa);
@@ -928,21 +931,16 @@ function Lab({ lang }: { lang: Lang }) {
           <select
             value={kind}
             onChange={(e) => {
-              setKind(e.target.value);
-              const c = example(isa, e.target.value);
+              const nextKind = e.target.value as AlgorithmKind;
+              setKind(nextKind);
+              const c = example(isa, nextKind);
               setCode(c);
               reset(c);
             }}
           >
-            <option value="sum">
-              {t("Somme de 1 à n", "Sum from 1 to n")}
-            </option>
-            <option value="double">
-              {t("Doubler une valeur", "Double a value")}
-            </option>
-            <option value="swap">
-              {t("Échanger par XOR", "Swap with XOR")}
-            </option>
+            {algorithms.map((item) => (
+              <option value={item.id} key={item.id}>{item.label[lang]}</option>
+            ))}
           </select>
         </label>
         <label>
@@ -973,11 +971,7 @@ function Lab({ lang }: { lang: Lang }) {
       <div className="pseudocode">
         <Code2 size={17} />
         <code>
-          {kind === "sum"
-            ? "total = 0; for (i = n; i >= 0; i--) total += i;"
-            : kind === "double"
-              ? "result = n + n;"
-              : "a = n; b = 10; a ^= b; b ^= a; a ^= b;"}
+          {algorithm.pseudocode}
         </code>
       </div>
       <div className="lab-grid">
@@ -1130,20 +1124,7 @@ function Lab({ lang }: { lang: Lang }) {
           {t("Comprendre cette expérience", "Understand this experiment")}
         </h2>
         <p>
-          {kind === "sum"
-            ? t(
-                "Le compteur démarre à n + 1, puis diminue avant chaque addition. L’accumulateur reçoit n, n − 1, …, 0. Le résultat vaut n × (n + 1) / 2. Le saut revient à loop tant que le compteur n’est pas nul.",
-                "The counter starts at n + 1, then decreases before each addition. The accumulator receives n, n − 1, …, 0. The result is n × (n + 1) / 2. The branch returns to loop while the counter is nonzero.",
-              )
-            : kind === "double"
-              ? t(
-                  "La même valeur est utilisée comme deux opérandes de l’addition. La destination contient 2 × n.",
-                  "The same value is used as both addition operands. The destination holds 2 × n.",
-                )
-              : t(
-                  "Trois XOR échangent deux registres distincts sans registre temporaire : (a XOR b) XOR b = a. Les valeurs de départ sont n et 10.",
-                  "Three XORs swap two distinct registers without a temporary register: (a XOR b) XOR b = a. The initial values are n and 10.",
-                )}
+          {algorithm.explanation[lang]}
         </p>
         <p>
           {t(

@@ -42,7 +42,7 @@ Le catalogue comporte **29 fiches pédagogiques**, enrichies par un catalogue ve
 
 ## Utiliser le laboratoire
 
-1. Choisir AMD64, ARM64 ou RISC-V, puis somme, doublement ou échange XOR.
+1. Choisir AMD64, ARM64 ou RISC-V, puis l’une des sept démonstrations : somme, doublement, échange XOR, Fibonacci, comptage de bits, puissance de deux ou assemblage d’un champ de bits.
 2. Entrer `n` entre 0 et 100. Il initialise respectivement RCX, X1 ou x1.
 3. Modifier librement l’assembleur dans le sous-ensemble accepté. Chaque modification du code, de l’ISA, de l’algorithme ou de la donnée réinitialise l’historique.
 4. Exécuter automatiquement ou instruction par instruction. La flèche marque **la prochaine instruction** ; les registres colorés indiquent les changements du dernier pas.
@@ -52,11 +52,11 @@ Le catalogue comporte **29 fiches pédagogiques**, enrichies par un catalogue ve
 
 | ISA   | Registres disponibles                | Instructions                 |
 | ----- | ------------------------------------ | ---------------------------- |
-| AMD64 | RAX, RBX, RCX, RDX, RSI, RDI, R8, R9 | MOV, ADD, SUB, XOR, CMP, JNZ |
-| ARM64 | X0–X7                                | MOV, ADD, SUB, EOR, CBNZ     |
-| RV64I | x0–x7                                | ADDI, ADD, SUB, XOR, BNE     |
+| AMD64 | RAX, RBX, RCX, RDX, RSI, RDI, R8, R9 | MOV, ADD, SUB, XOR, AND, OR, SHL, SHR, CMP, JNZ, JZ |
+| ARM64 | X0–X7                                | MOV, ADD, SUB, EOR, AND, ORR, LSL, LSR, CBNZ, CBZ |
+| RV64I | x0–x7                                | ADDI, ANDI, ORI, SLLI, SRLI, ADD, SUB, XOR, BNE, BEQ |
 
-Syntaxe Intel pour AMD64 (destination en premier), syntaxe A64 avec immédiats `#`, syntaxe RISC-V avec destination en premier. Les mnémoniques et registres sont insensibles à la casse ; les étiquettes sont sensibles à la casse. Commentaires : `;`. Étiquettes : `loop:`. Décimal et hexadécimal positif `0x…` sont acceptés. Les immédiats ADDI vont de −2048 à 2047. ADD/SUB immédiat A64 accepte 0–4095, sans variante décalée. MOV est volontairement pédagogique : les contraintes d’encodage des constantes ne sont pas vérifiées.
+Syntaxe Intel pour AMD64 (destination en premier), syntaxe A64 avec immédiats `#`, syntaxe RISC-V avec destination en premier. Les mnémoniques et registres sont insensibles à la casse ; les étiquettes sont sensibles à la casse. Commentaires : `;`. Étiquettes : `loop:`. Décimal et hexadécimal positif `0x…` sont acceptés. Les immédiats arithmétiques et logiques RISC-V vont de −2048 à 2047 ; les décalages immédiats vont de 0 à 63. ADD/SUB immédiat A64 accepte 0–4095. MOV accepte des constantes pédagogiques sans valider leur encodage exact.
 
 ```asm
 ; AMD64 : somme de n à 0 ; RCX est initialisé par le formulaire
@@ -140,7 +140,7 @@ ISA Explorer is a frontend-only educational React/TypeScript/Vite site. It intro
 
 Run `npm ci && npm run dev`. Build with `npm run build`; verify with `npm run check`, `npm test`, and `npm run test:e2e` after installing Chromium with `npx playwright install --with-deps chromium`. Docker: `docker compose up --build -d --wait`, then open `http://localhost:8080`. Change the port using `ISA_PORT`.
 
-Select an ISA and one of three algorithms (sum, double, XOR swap). Enter n between zero and 100; RCX, X1 or x1 receives it. Editing code or input resets the run. Step, run, pause, rewind and reset controls expose immutable register snapshots. The PC is an instruction index, values are unsigned 64-bit BigInts, and the bit display shows the low byte. Only AMD64 ZF is modeled. The lab has eight visible registers per ISA, no memory or stack, and a 2,000-step safety limit. See the exact subset table above. Comments start with `;`; labels end in `:`. Instruction references have dedicated hash URLs and official source links.
+Select an ISA and one of seven algorithms: sum, double, XOR swap, Fibonacci, population count, power of two, or bit-field packing. Enter n between zero and 100; RCX, X1 or x1 receives it. Editing code or input resets the run. Step, run, pause, rewind and reset controls expose immutable register snapshots. The PC is an instruction index, values are unsigned 64-bit BigInts, and the bit display shows the low byte. Only AMD64 ZF is modeled. The lab has eight visible registers per ISA, no memory or stack, and a 2,000-step safety limit. See the exact subset table above. Comments start with `;`; labels end in `:`. Instruction references have dedicated hash URLs and official source links.
 
 Browser language is detected on first visit, defaulting to English unless French. Theme follows the OS unless overridden. Preferences are saved locally; programs are not uploaded or persisted. Animations respect reduced-motion preferences. The in-app help page is fully available in English.
 
